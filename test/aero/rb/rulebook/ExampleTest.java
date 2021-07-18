@@ -14,6 +14,42 @@ public class ExampleTest {
         UNCERTAIN
     }
 
+    @Test
+    void exampleSimpleRuleTest() {
+        Rule<String> stringRule = Rule.of(String::isEmpty, str -> System.out.println("String is empty!"));
+
+        stringRule.invokeIfMatching(""); // sysout = "String is empty!"
+        stringRule.invokeIfMatching("abc"); // nothing happens
+        stringRule.isMatching(""); // true
+    }
+
+    @Test
+    void exampleSimpleRulesetTest() {
+        Rule<String> stringNotEmptyRule = Rule.of(str -> !str.isEmpty(), str -> System.out.println("String is not empty!"));
+        Rule<String> stringIsAbc = Rule.of("abc"::equals, str -> System.out.println("String is equal to abc!"));
+
+        Ruleset<String> ruleset = Ruleset.of(Objects::nonNull, stringNotEmptyRule, stringIsAbc);
+
+        ruleset.invokeMatchingRules(""); // nothing happens
+        ruleset.invokeMatchingRules("abc"); // sysout = "String is not empty!" & "String is equal to abc!"
+        ruleset.invokeMatchingRules("123"); // sysout = "String is not empty!"
+    }
+
+    @Test
+    void exampleSimpleRulebookTest() {
+        Rule<String> stringNotEmptyRule = Rule.of(str -> !str.isEmpty(), str -> System.out.println("String is not empty!"));
+        Rule<String> stringIsAbc = Rule.of("abc"::equals, str -> System.out.println("String is equal to abc!"));
+
+        Ruleset<String> ruleset1 = Ruleset.of(Objects::nonNull, stringNotEmptyRule, stringIsAbc);
+        Ruleset<String> ruleset2 = Ruleset.of(String::isEmpty, Rule.of(String::isEmpty, str -> System.out.println("String is empty")));
+
+        Rulebook<String> rulebook = Rulebook.of(ruleset1, ruleset2);
+
+        rulebook.invokeMatchingRules(""); // sysout = "String is empty!"
+        rulebook.invokeMatchingRules("abc"); // sysout = "String is not empty!" & "String is equal to abc!"
+        rulebook.invokeMatchingRules("123"); // sysout = "String is not empty!"
+    }
+
     /**
      * Output:
      *
@@ -35,7 +71,7 @@ public class ExampleTest {
                         Ruleset.of(list -> list.size() != 2,
                                 Rule.of(Objects::nonNull, list -> System.out.print(list + " ")),
                                 Rule.of(list -> list.size() < 2, list -> System.out.println("List size too small! Expected 2!")),
-                                Rule.of(list -> list.size() > 3, list -> System.out.println("List size too big! Expected 2!"))
+                                Rule.of(list -> list.size() > 2, list -> System.out.println("List size too big! Expected 2!"))
                         ),
                         Ruleset.of(list -> list.size() == 2,
                                 Rule.of(Objects::nonNull, list -> System.out.print(list + " ")),
