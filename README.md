@@ -3,6 +3,44 @@
  A rule consists out of a Predicate and consumers which will be invoked if the rule's condition is true.
 
 # Usage 
+Simple rule:
+
+```java
+Rule<String> stringRule = Rule.of(String::isEmpty, str -> System.out.println("String is empty!"));
+
+stringRule.invokeIfMatching(""); // sysout = "String is empty!"
+stringRule.invokeIfMatching("abc"); // nothing happens
+stringRule.isMatching(""); // true
+```
+
+Group rules into rulesets:
+
+```java
+Rule<String> stringNotEmptyRule = Rule.of(str -> !str.isEmpty(), str -> System.out.println("String is not empty!"));
+Rule<String> stringIsAbc = Rule.of("abc"::equals, str -> System.out.println("String is equal to abc!"));
+
+Ruleset<String> ruleset = Ruleset.of(Objects::nonNull, stringNotEmptyRule, stringIsAbc);
+
+ruleset.invokeMatchingRules(""); // nothing happens
+ruleset.invokeMatchingRules("abc"); // sysout = "String is not empty!" & "String is equal to abc!"
+ruleset.invokeMatchingRules("123"); // sysout = "String is not empty!"
+```
+
+Group rulesets into rulebooks:
+
+```java
+Rule<String> stringNotEmptyRule = Rule.of(str -> !str.isEmpty(), str -> System.out.println("String is not empty!"));
+Rule<String> stringIsAbc = Rule.of("abc"::equals, str -> System.out.println("String is equal to abc!"));
+
+Ruleset<String> ruleset1 = Ruleset.of(Objects::nonNull, stringNotEmptyRule, stringIsAbc);
+Ruleset<String> ruleset2 = Ruleset.of(String::isEmpty, Rule.of(String::isEmpty, str -> System.out.println("String is empty")));
+
+Rulebook<String> rulebook = Rulebook.of(ruleset1, ruleset2);
+
+rulebook.invokeMatchingRules(""); // sysout = "String is empty!"
+rulebook.invokeMatchingRules("abc"); // sysout = "String is not empty!" & "String is equal to abc!"
+rulebook.invokeMatchingRules("123"); // sysout = "String is not empty!"
+```
 
 # Example
  This is the output ...
@@ -18,8 +56,7 @@ The given list is empty.
 ```
 
 of the following code:
- ```java
- 
+ ```java 
 import static aero.rb.rulebook.ExampleTest.States.*;
 
 enum States{
