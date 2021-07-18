@@ -14,6 +14,17 @@ public class ExampleTest {
         UNCERTAIN
     }
 
+    /**
+     * Output:
+     *
+     * [NEGATIVE, POSITIVE, NEGATIVE, NEGATIVE] List size too big! Expected 2!
+     * [NEGATIVE, POSITIVE] -+
+     * [UNCERTAIN, UNCERTAIN] ??
+     * [NEGATIVE, POSITIVE] -+
+     * [POSITIVE] List size too small! Expected 2!
+     * The given list is empty.
+     * [] List size too small! Expected 2!
+     */
     @Test
     void patternMatchingTest() {
         Rulebook<List<States>> rulebook =
